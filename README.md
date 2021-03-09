@@ -1,4 +1,6 @@
-# keygen
+# keygen 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/cyberrumor)
+
 Keygen composes original music in the form of midi files.
 
 # Usage
@@ -20,3 +22,5 @@ Let the software decide the key and modes:
 This will install `mido` and my music theory library `midi-abstraction`.
 
 
+
+[Listen on YouTube](https://youtu.be/8cNvCt9-Fo0)
