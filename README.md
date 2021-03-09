@@ -10,7 +10,7 @@ Write a song with a single mode:
 
 - `python3 keygen.py 'd_dorian'`
 
-Let the software decide they key and modes:
+Let the software decide the key and modes:
 
 - `python3 keygen.py`
 
