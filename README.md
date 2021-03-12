@@ -23,4 +23,4 @@ This will install `mido` and my music theory library `midi-abstraction`.
 
 
 
-[Listen on YouTube](https://youtu.be/8cNvCt9-Fo0)
+[Listen on YouTube](https://youtube.com/playlist?list=PLga7ghRRjd7JDKeb3WpCMyalVHA7uLpps)
