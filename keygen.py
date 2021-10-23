@@ -23,46 +23,14 @@ def get_music(source, mixin, rhythm):
 	progression.append(last_chord)
 	progression = [opt[0]] + progression
 
-	# produce a motif, 4 notes long, repeated twice each measure
-	scale = source.list_notes()
-	altscale = mixin.list_notes()
-	uncommon_index = []
-	common_index = []
-
-	if source.name != mixin.name:
-		for a, b in zip(scale, altscale):
-			if a != b:
-				uncommon_index.append(scale.index(a))
-			else:
-				common_index.append(scale.index(a))
-	else:
-		for a, b in zip(scale, altscale):
-			if a == b:
-				uncommon_index.append(scale.index(a))
-				common_index.append(scale.index(a))
-
-	motif = []
-	for i in random.choices(common_index, k = 4):
-		motif.append(i)
-
-	# fit tonal center into motif at either beginning or end, if it's not already in there
-	if 0 not in motif:
-		spot = random.choice([-1, 0])
-		motif[spot] = 0
-
-	# pick random non start non end to put outlier
-	spot = random.choice(range(1, len(motif) - 1))
-	outlier = random.choice(uncommon_index)
-	motif[spot] = outlier
-	motif *= 2
-
 	chord_result = []
+	melody_result = []
 	for i in range(len(rhythm)):
 		# we need to doctor the notes of the motif if it won't fit with the chord.
 		chord_notes = []
 		chord_result.append([])
 		for e in range(len(midi_abstraction.chords(progression[i]))):
-			octave = random.choice([3, 4, 4, 4, 4])
+			octave = random.choice([2, 3, 3, 4, 4, 4])
 			chord_result[i].append({})
 			chord_result[i][e]['name'] = progression[i]
 			chord_result[i][e]['rhythm'] = rhythm[i]
@@ -70,31 +38,110 @@ def get_music(source, mixin, rhythm):
 			chord_result[i][e]['pitch'] = midi_abstraction.chords(progression[i])[e][octave]
 			chord_notes.append(midi_abstraction.notes(midi_abstraction.chords(progression[i])[e][octave]))
 
-	melody = []
-	for i in progression:
-		if i in source.list_chords():
+		# whole note melody rhythms
+		possible_whole_notes = [
+			# [128] * 8, # eight eighths
+			[256] * 4, # four quarter notes
+			[512] * 2, # two half notes
+			# [1024], # one whole note
+			[512, 256, 256], # half, quarter, quarter
+			[256, 256, 512], # quarter, quarter, half
+
+			# uniques
+			[128, 128, 128, 128, 512],
+			[256, 256, 128, 128, 128, 128],
+			[128, 128, 256, 512],
+			[512, 128, 128, 256],
+			[512, 256, 128, 128],
+		]
+
+
+
+		# collect appropriate number of melody rhythms
+		melody_rhythm = []
+		c = random.choice(possible_whole_notes)
+		flip = random.choice([True, False])
+		if flip:
+			c.reverse()
+		melody_rhythm += c
+		num_whole_notes = int(chord_result[i][e]['rhythm'] / 1024)
+		melody_rhythm *= num_whole_notes
+
+
+		# produce a motif, len(melody_rhythm) notes long
+		scale = source.list_notes()
+		altscale = mixin.list_notes()
+		uncommon_index = []
+		common_index = []
+
+		if source.name != mixin.name:
+			for a, b in zip(scale, altscale):
+				# print(f'a: {a}, b: {b}')
+				if a != b:
+					uncommon_index.append(scale.index(a))
+				else:
+					common_index.append(scale.index(a))
+		else:
+			for a, b in zip(scale, altscale):
+				# print(f'a: {a}, b: {b}')
+				if a == b:
+					uncommon_index.append(scale.index(a))
+					common_index.append(scale.index(a))
+
+		motif = []
+		for y in random.choices(common_index, k = len(melody_rhythm)):
+			motif.append(y)
+
+
+		print(f'motif: {motif}')
+		# fit tonal center into motif at either beginning or end, if it's not already in there
+		# if 0 not in motif:
+		#	spot = random.choice([-1, 0])
+		#	motif[spot] = 0
+
+		# pick random non start non end to put outlier
+		# spot = random.choice(range(1, len(motif) - 1))
+		# outlier = random.choice(uncommon_index)
+		# motif[spot] = outlier
+
+		melody = []
+		if chord_result[i][e]['name'] in source.list_chords():
 			motif_test = [scale[x] for x in motif]
 		else:
 			motif_test = [altscale[x] for x in motif]
-		for x in motif_test:
-			melody.append(x)
+		for h in motif_test:
+			melody.append(h)
 
-	melody_result = []
-	for i in range(len(melody)):
+
+		print(f'melody: {melody}')
+		print(f'melody_rhythm: {melody_rhythm}')
+		print()
+
+
 		melody_result.append([])
-		melody_result[i].append({})
-		melody_result[i][0]['name'] = melody[i]
-		melody_result[i][0]['rhythm'] = 128
-		octave = random.choice([5, 5, 6])
-		melody_result[i][0]['pitch'] = midi_abstraction.notes(melody[i])[octave]
-		melody_result[i][0]['vel'] = random.randint(50, 70)
+		for w in range(len(melody_rhythm)):
+			print(f'melody_result: {melody_result}')
+			melody_result[i].append({})
+			melody_result[i][w]['name'] = melody[w]
+			melody_result[i][w]['rhythm'] = melody_rhythm[w]
+			octave = random.choice([4, 5, 6, 6, 7])
+			melody_result[i][w]['pitch'] = midi_abstraction.notes(melody[w])[octave]
+			melody_result[i][w]['vel'] = random.randint(50, 70)
+
+
+
+
+
 	return chord_result, melody_result
 
 def get_track(data, kind, measure):
 	tracks = []
 	beat = 0
 	for part in data:
+		print(f'kind: {kind}')
+		print(f'part in data: {part}')
 		for sound in part:
+			print(f'sound in part: {sound}')
 			t = mido.MidiTrack()
 			n = sound['pitch']
 			v = sound['vel']
@@ -170,19 +217,18 @@ if __name__ == '__main__':
 
 
 	# set up rhythms
-	chord_rhythms = [[1024] * 4]
-	# chord_rhythms.append([1024, 1024, 2048])
-	melody_rhythms = [[256] * 16]
+	rhythms = [[1024] * 4]
+	rhythms.append([1024, 1024, 2048])
 
-	chords_a, melody_a = get_music(source, mixin, random.choice(chord_rhythms))
-	chords_b, melody_b = get_music(source, mixin, random.choice(chord_rhythms))
-	chords_c, melody_c = get_music(source, mixin, random.choice(chord_rhythms))
-	chords_d, melody_d = get_music(source, mixin, random.choice(chord_rhythms))
-	chords_e, melody_e = get_music(source, mixin, random.choice(chord_rhythms))
-	chords_f, melody_f = get_music(source, mixin, random.choice(chord_rhythms))
-	chords_g, melody_g = get_music(source, mixin, random.choice(chord_rhythms))
-	chords_h, melody_h = get_music(source, mixin, random.choice(chord_rhythms))
-	chords_i, melody_i = get_music(source, mixin, random.choice(chord_rhythms))
+	chords_a, melody_a = get_music(source, mixin, random.choice(rhythms))
+	chords_b, melody_b = get_music(source, mixin, random.choice(rhythms))
+	chords_c, melody_c = get_music(source, mixin, random.choice(rhythms))
+	chords_d, melody_d = get_music(source, mixin, random.choice(rhythms))
+	chords_e, melody_e = get_music(source, mixin, random.choice(rhythms))
+	chords_f, melody_f = get_music(source, mixin, random.choice(rhythms))
+	chords_g, melody_g = get_music(source, mixin, random.choice(rhythms))
+	chords_h, melody_h = get_music(source, mixin, random.choice(rhythms))
+	chords_i, melody_i = get_music(source, mixin, random.choice(rhythms))
 
 	melody_z = melody_a[0:int(len(melody_a) / 2)] * 2
 	chords_z = [[{'name': 'a', 'vel': 0, 'rhythm': 4096, 'pitch': 0}]]
