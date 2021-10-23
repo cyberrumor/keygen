@@ -40,7 +40,7 @@ def get_music(source, mixin, rhythm):
 
 		# whole note melody rhythms
 		possible_whole_notes = [
-			# [128] * 8, # eight eighths
+			[128] * 8, # eight eighths
 			[256] * 4, # four quarter notes
 			[512] * 2, # two half notes
 			# [1024], # one whole note
@@ -54,8 +54,6 @@ def get_music(source, mixin, rhythm):
 			[512, 128, 128, 256],
 			[512, 256, 128, 128],
 		]
-
-
 
 		# collect appropriate number of melody rhythms
 		melody_rhythm = []
@@ -92,17 +90,12 @@ def get_music(source, mixin, rhythm):
 		for y in random.choices(common_index, k = len(melody_rhythm)):
 			motif.append(y)
 
-
-		print(f'motif: {motif}')
 		# fit tonal center into motif at either beginning or end, if it's not already in there
-		# if 0 not in motif:
-		#	spot = random.choice([-1, 0])
-		#	motif[spot] = 0
-
-		# pick random non start non end to put outlier
-		# spot = random.choice(range(1, len(motif) - 1))
-		# outlier = random.choice(uncommon_index)
-		# motif[spot] = outlier
+		if 0 not in motif:
+			spot = random.choice([-1, 0])
+			motif[spot] = 0
+			outlier = random.choice(uncommon_index)
+			motif[spot] = outlier
 
 		melody = []
 		if chord_result[i][e]['name'] in source.list_chords():
@@ -112,25 +105,14 @@ def get_music(source, mixin, rhythm):
 		for h in motif_test:
 			melody.append(h)
 
-
-		print(f'melody: {melody}')
-		print(f'melody_rhythm: {melody_rhythm}')
-		print()
-
-
 		melody_result.append([])
 		for w in range(len(melody_rhythm)):
-			print(f'melody_result: {melody_result}')
 			melody_result[i].append({})
 			melody_result[i][w]['name'] = melody[w]
 			melody_result[i][w]['rhythm'] = melody_rhythm[w]
-			octave = random.choice([4, 5, 6, 6, 7])
+			octave = random.choice([4, 5, 5, 5, 6, 6, 6, 7])
 			melody_result[i][w]['pitch'] = midi_abstraction.notes(melody[w])[octave]
 			melody_result[i][w]['vel'] = random.randint(50, 70)
-
-
-
-
 
 	return chord_result, melody_result
 
@@ -138,10 +120,7 @@ def get_track(data, kind, measure):
 	tracks = []
 	beat = 0
 	for part in data:
-		print(f'kind: {kind}')
-		print(f'part in data: {part}')
 		for sound in part:
-			print(f'sound in part: {sound}')
 			t = mido.MidiTrack()
 			n = sound['pitch']
 			v = sound['vel']
