@@ -30,8 +30,14 @@ def get_music(source, mixin, rhythm):
 		# we need to doctor the notes of the motif if it won't fit with the chord.
 		chord_notes = []
 		chord_result.append([])
+		octs = random.choice([
+			[2, 3, 4],
+			[3, 3, 3],
+			[4, 4, 4],
+		])
+
 		for e in range(len(midi_abstraction.chords(progression[i]))):
-			octave = random.choice([2, 3, 3, 4, 4, 4])
+			octave = octs[e]
 			chord_result[i].append({})
 			chord_result[i][e]['name'] = progression[i]
 			chord_result[i][e]['rhythm'] = rhythm[i]
@@ -88,7 +94,7 @@ def get_music(source, mixin, rhythm):
 
 		# increase the length of motify possibilities so we can make a melody without so much repitition
 		common_index *= 2
-		common_index += uncommon_index * 3
+		common_index += uncommon_index * 2
 		motif = random.sample(common_index, len(melody_rhythm))
 
 
@@ -222,22 +228,22 @@ if __name__ == '__main__':
 
 	# set up form
 	c_patterns = [
-		[chords_a, chords_a, chords_b, chords_b] * 4 +
+		[chords_a, chords_a, chords_b, chords_b] * 2 +
 		[chords_c, chords_d, chords_c, chords_d] +
 		[chords_e, chords_e, chords_e, chords_e] +
-		[chords_a, chords_a, chords_b, chords_b] * 4 +
+		[chords_a, chords_a, chords_b, chords_b] * 2 +
 		[chords_c, chords_d, chords_c, chords_d] +
-		[chords_f, chords_g, chords_h, chords_h] * 4 +
+		[chords_f, chords_g, chords_h, chords_h] * 2 +
 		[chords_a, chords_i, chords_a, chords_b]
 	]
 
 	m_patterns = [
-		[melody_a, melody_a, melody_b, melody_b] * 4 +
+		[melody_a, melody_a, melody_b, melody_b] * 2 +
 		[melody_c, melody_d, melody_c, melody_d] +
 		[melody_e, melody_e, melody_e, melody_e] +
-		[melody_a, melody_a, melody_b, melody_b] * 4 +
+		[melody_a, melody_a, melody_b, melody_b] * 2 +
 		[melody_c, melody_d, melody_c, melody_d] +
-		[melody_f, melody_g, melody_h, melody_h] * 4 +
+		[melody_f, melody_g, melody_h, melody_h] * 2 +
 		[melody_a, melody_i, melody_a, melody_b]
 	]
 
