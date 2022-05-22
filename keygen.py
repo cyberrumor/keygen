@@ -263,19 +263,17 @@ if __name__ == '__main__':
 			tracks.append(track)
 			measure += 4096
 		mix = mido.merge_tracks(tracks)
-		parts.append(mix)
+		# parts.append(mix)
+		mid.tracks = [mix]
 
-	for part in parts:
-		mid.tracks.append(part)
+		# write the file
 
-	# write the file
+		if mixin.name != source.name:
+			filename = k + '_' + mixin.name.split('_')[-1] + '_' + part['kind'] + '.mid'
+		else:
+			filename = k + '_' + part['kind'] + '.mid'
 
-	if mixin.name != source.name:
-		filename = k + '_' + mixin.name.split('_')[-1] + '.mid'
-	else:
-		filename = k + '.mid'
-
-	mid.save(filename)
-	print(f'saved as: {filename}')
+		mid.save(filename)
+		print(f'saved as: {filename}')
 
 
