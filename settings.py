@@ -4,13 +4,14 @@
 # 1024 is a whole note, 512 is a half note, etc.
 # For example, [1024, 1024, 2048] would produce
 # a chord progression with three unique chords arranged
-# in note duration as quarter, quarter, half.
+# in note duration as whole, whole, double.
 # Each entry must have a sum of 4096, which is one measure.
 # We don't consider diminished chords in keygen, which gives
 # us a theoretical maximum of 6 chords per progression.
 # Keygen artificially limits this to 4, so don't exceed 4.
 rhythms = [[1024] * 4]
 rhythms.append([1024, 1024, 2048])
+# rhythms.append([2048, 2048])
 
 # chord_velocity_min controls the lowest possible keypress pressure for any note in a chord.
 # this must be less than chord_velocity_max. Lowest acceptible is 0.
