@@ -3,10 +3,19 @@ import sys
 import random
 import mido
 import midi_abstraction
+import settings
 
+# accepts midi_abstraction.Key, midi_abstraction.Key,
+# list of integers that summmarize to 4096.
+# outputs two lists of dicts, where each dict represents a measure of data.
+# the first output list is for chords, the other for melody.
 def get_music(source, mixin, rhythm):
+	# beginning determines whether the tonal cennter will be the first or last note of the
+	# motif. This isn't used until later but is defined outside of the loop for increased
+	# consistency on location of tonal center. Matters most if rev and walk are false.
 	beginning = random.choice([True, False])
 
+	# get a list of chord options, exclude diminished.
 	opt = [i for i in source.list_chords() if 'dim' not in i]
 	length = len(rhythm) - 2
 
@@ -17,6 +26,7 @@ def get_music(source, mixin, rhythm):
 	# get a borrowed chord
 	last_chords = []
 	for i in mixin.list_chords():
+		# don't consider diminished chords, as they're difficult to automatically accommodate.
 		if 'dim' not in i and i not in progression:
 			last_chords.append(i)
 
@@ -30,49 +40,30 @@ def get_music(source, mixin, rhythm):
 		# we need to doctor the notes of the motif if it won't fit with the chord.
 		chord_notes = []
 		chord_result.append([])
-		octs = random.choice([
-			[2, 3, 4],
-			[3, 3, 3],
-			[4, 4, 4],
-		])
+		octs = random.choice(settings.octs)
 
 		for e in range(len(midi_abstraction.chords(progression[i]))):
 			octave = octs[e]
 			chord_result[i].append({})
 			chord_result[i][e]['name'] = progression[i]
 			chord_result[i][e]['rhythm'] = rhythm[i]
-			chord_result[i][e]['vel'] = random.randint(50, 70)
+			chord_result[i][e]['vel'] = random.randint(settings.chord_velocity_min, settings.chord_velocity_max)
 			chord_result[i][e]['pitch'] = midi_abstraction.chords(progression[i])[e][octave]
 			chord_notes.append(midi_abstraction.notes(midi_abstraction.chords(progression[i])[e][octave]))
 
 		# whole note melody rhythms
-		possible_whole_notes = [
-			# [128] * 8, # eight eighths
-			[256] * 4, # four quarter notes
-			[512] * 2, # two half notes
-			# [1024], # one whole note
-			[512, 256, 256], # half, quarter, quarter
-			[256, 256, 512], # quarter, quarter, half
-
-			# uniques
-			[128, 128, 128, 128, 512],
-			[256, 256, 128, 128, 128, 128],
-			[128, 128, 256, 512],
-			[512, 128, 128, 256],
-			[512, 256, 128, 128],
-		]
+		possible_whole_notes = settings.possible_whole_notes
 
 		# collect appropriate number of melody rhythms
 		melody_rhythm = []
 		c = random.choice(possible_whole_notes)
-		flip = random.choice([True, False])
-		if flip:
+		flip = settings.flip
+		if flip and random.choice([True, False]):
 			c.reverse()
 		melody_rhythm += c
 
 		num_whole_notes = int(chord_result[i][e]['rhythm'] / 1024)
 		melody_rhythm *= num_whole_notes
-
 
 		# produce a motif, len(melody_rhythm) notes long
 		scale = source.list_notes()
@@ -80,6 +71,7 @@ def get_music(source, mixin, rhythm):
 		uncommon_index = []
 		common_index = []
 
+		# index the 
 		if source.name != mixin.name:
 			for a, b in zip(scale, altscale):
 				if a != b:
@@ -97,23 +89,26 @@ def get_music(source, mixin, rhythm):
 		common_index += uncommon_index * 2
 		motif = random.sample(common_index, len(melody_rhythm))
 
-
+		# Guarantee the tonal center is either the first or last note of the motif.
 		if 0 not in [motif[0], motif[-1]]:
-			walk = random.choice([True, False])
-			rev = random.choice([True, False])
+			walk = settings.walk
+			rev = settings.rev
 
+			# rev and walk may make "beginning" seem redundant, but note that "beginning"
+			# is defined outside of the loop, which will cause the song to have a more
+			# consistent location for the tonal center, especially if rev and walk are false.
 			if beginning:
 				motif[0] = 0
 			else:
 				motif[-1] = 0
 
-			if walk:
+			if walk and random.choice([True, False]):
 				sorted(motif)
-			if rev:
+			if rev and random.choice([True, False]):
 				motif.reverse()
 
 
-
+		# Guarantee the motif selects notes available from the current chord. This only matters for modal mixture.
 		melody = []
 		if chord_result[i][e]['name'] in source.list_chords():
 			motif_test = [scale[x] for x in motif]
@@ -127,12 +122,15 @@ def get_music(source, mixin, rhythm):
 			melody_result[i].append({})
 			melody_result[i][w]['name'] = melody[w]
 			melody_result[i][w]['rhythm'] = melody_rhythm[w]
-			octave = random.choice([4, 5, 5, 5, 6, 6, 6])
+			octave = random.choice(settings.melody_octaves)
 			melody_result[i][w]['pitch'] = midi_abstraction.notes(melody[w])[octave]
-			melody_result[i][w]['vel'] = random.randint(50, 70)
+			melody_result[i][w]['vel'] = random.randint(settings.melody_velocity_min, settings.melody_velocity_max)
 
 	return chord_result, melody_result
 
+# accepts output from get_music, string of either "chord" or "melody",
+# and integer divisible by 4096 (this determines the global position of the measure).
+# outputs mido.MidiTrack.
 def get_track(data, kind, measure):
 	tracks = []
 	beat = 0
@@ -177,14 +175,14 @@ if __name__ == '__main__':
 	k = n + '_' + m
 	print(f'key: {k}')
 
-	# set file resolution
+	# set file resolution. If you multiply this to increase quality, make sure to increase all other time values by the same factor.
 	mid = mido.MidiFile(type = 1, ticks_per_beat = 256)
 
 	# get our song key object: source
 	source = midi_abstraction.Key(k)
 
 	own_note = source.name.split('_')[0]
-
+	# if no key was specified, use modal mixture, but not with locrian. Locrian has no tonal center.
 	if not altmode:
 		altmode = {}
 		all_modes = midi_abstraction.list_modes()
@@ -212,9 +210,8 @@ if __name__ == '__main__':
 	print(f'secondary mode: {mixin.name}')
 
 
-	# set up rhythms
-	rhythms = [[1024] * 4]
-	rhythms.append([1024, 1024, 2048])
+	# SET UP RHYTHMS
+	rhythms = settings.rhythms
 
 	chords_a, melody_a = get_music(source, mixin, random.choice(rhythms))
 	chords_b, melody_b = get_music(source, mixin, random.choice(rhythms))
@@ -226,7 +223,7 @@ if __name__ == '__main__':
 	chords_h, melody_h = get_music(source, mixin, random.choice(rhythms))
 	chords_i, melody_i = get_music(source, mixin, random.choice(rhythms))
 
-	# set up form
+	# SET UP FORM
 	c_patterns = [
 		[chords_a, chords_a, chords_b, chords_b] * 2 +
 		[chords_c, chords_d, chords_c, chords_d] +
@@ -247,6 +244,8 @@ if __name__ == '__main__':
 		[melody_a, melody_i, melody_a, melody_b]
 	]
 
+	# "form" ensures that you are using the same pattern structure for chords and melodies,
+	# in case multiple are defined. Only one is defined by default.
 	form = random.randint(0, len(c_patterns) - 1)
 	blueprint = [
 		{'pattern': c_patterns[form], 'kind': 'chord'},
@@ -275,5 +274,7 @@ if __name__ == '__main__':
 
 		mid.save(filename)
 		print(f'saved as: {filename}')
+
+	input("Press [Enter] to close.")
 
 
