@@ -18,6 +18,7 @@ Let the software decide the key and modes:
 
 
 # Requirements
+- requires python 3.10 or newer
 - `pip3 install -r requirements.txt`
 This will install `mido` and my music theory library `midi-abstraction`.
 
