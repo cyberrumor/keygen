@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 
 # rhythms controls the layout of measures.
-# 1024 is a whole note, 512 is a half note, etc.
+# 4096 is a whole note, 2048 is a half note, 1024qt etc.
 # For example, [1024, 1024, 2048] would produce
 # a chord progression with three unique chords arranged
 # in note duration as whole, whole, double.
 # Each entry must have a sum of 4096, which is one measure.
 # We don't consider diminished chords in keygen, which gives
-# us a theoretical maximum of 6 chords per progression.
+# use a theoretical maximum of 6 chords per progression.
 # Keygen artificially limits this to 4, so don't exceed 4.
 rhythms = [[1024] * 4]
 rhythms.append([1024, 1024, 2048])
 # rhythms.append([2048, 2048])
-
 # chord_velocity_min controls the lowest possible keypress pressure for any note in a chord.
 # this must be less than chord_velocity_max. Lowest acceptible is 0.
 chord_velocity_min = 50
@@ -34,19 +33,19 @@ octs = [
 # possible_whole_notes dictates the order of note durations in the melody.
 # each entry must have a sum of 1024.
 possible_whole_notes = [
-		# [128] * 8, # eight eigths
-		[256] * 4, # four quarter notes
-		[512] * 2, # two half notes
-		# [1024], # one whole note,
-		[512, 256, 256], # half, quarter, quarter
-		# [256, 256, 512], # quarter, quarter, half
+		[512] * 8, # eight eigths
+		[1024] * 4, # four quarter notes
+		[2048] * 2, # two half notes
+		[4096], # one whole note,
+		[2048, 1024, 1024], # half, quarter quarter
+		[1024, 1024, 2048], # quarter, quarter, half
 
 		# unique patterns
-		[128, 128, 128, 128, 512],
-		[256, 256, 128, 128, 128, 128],
-		# [128, 128, 256, 512],
-		[512, 128, 128, 256],
-		[512, 256, 128, 128],
+		[1024, 512, 512, 2048],
+		[512, 1024, 1024, 512, 512],
+		[1024, 1024, 1024, 1024],
+		[512, 128, 128, 128, 1024, 512, 128, 128, 128, 1024, 1024],
+		[512, 512, 512, 1024, 512, 1024],
 	]
 
 # flip determines whether it is possible to use reversed order for possible_whole_notes.
@@ -58,7 +57,7 @@ flip = True
 # ascending. This operation occurs after flip, before rev.
 walk = True
 
-# rev determines wehther the entire motif has a 50/50 chance to be reversed.
+# rev determines whether the entire motif has a 50/50 chance to be reversed.
 # if this and walk are both true, there is a possibility for descending scales rather
 # than just ascending. This operation occurs after flip and walk.
 rev = True
