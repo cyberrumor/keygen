@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 # rhythms controls the layout of measures.
-# 1024 is a whole note, 512 is a half note, etc.
+# 1024 is a quarter note, 512 is an eighth note, etc.
 # For example, [1024, 1024, 2048] would produce
 # a chord progression with three unique chords arranged
-# in note duration as whole, whole, double.
+# in note duration as quarter, quarter, half.
 # Each entry must have a sum of 4096, which is one measure.
 # We don't consider diminished chords in keygen, which gives
 # us a theoretical maximum of 6 chords per progression.
@@ -31,9 +31,9 @@ octs = [
 		[4, 4, 4],
 	]
 
-# possible_whole_notes dictates the order of note durations in the melody.
+# possible_quarter_notes dictates the order of note durations in the melody.
 # each entry must have a sum of 1024.
-possible_whole_notes = [
+possible_quarter_notes = [
 		# [128] * 8, # eight eigths
 		[256] * 4, # four quarter notes
 		[512] * 2, # two half notes
@@ -49,7 +49,7 @@ possible_whole_notes = [
 		[512, 256, 128, 128],
 	]
 
-# flip determines whether it is possible to use reversed order for possible_whole_notes.
+# flip determines whether it is possible to use reversed order for possible_quarter_notes.
 # if set to True, there is a 50/50 chance of reversal. This operation occurs before rev
 # and before walk.
 flip = True
