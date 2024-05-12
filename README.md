@@ -1,27 +1,48 @@
-# keygen 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/cyberrumor)
+# keygen
 
 Keygen composes original music in the form of midi files.
 
+
 # Usage
-Write a song with modal mixture:
 
-- `python3 keygen.py 'c_major' 'minor'`
+```bash
+usage: keygen [-h] --tonic {c,cs,db,d,ds,eb,e,f,fs,gb,g,gs,ab,a,as,bb,b} --mode
+              {ionian,dorian,phrygian,lydian,mixolydian,aeolian,locrian,major,minor}
+              DEST
 
-Write a song with a single mode:
+Generate midi
 
-- `python3 keygen.py 'd_dorian'`
+positional arguments:
+  DEST                  the name of the output file
 
-Let the software decide the key and modes:
-
-- `python3 keygen.py`
-
-
-# Requirements
-- requires python 3.10 or newer
-- `pip3 install -r requirements.txt`
-This will install `mido` and my music theory library `midi-abstraction`.
+options:
+  -h, --help            show this help message and exit
+  --tonic {c,cs,db,d,ds,eb,e,f,fs,gb,g,gs,ab,a,as,bb,b}
+                        the root note of the scale.
+  --mode {ionian,dorian,phrygian,lydian,mixolydian,aeolian,locrian,major,minor}
+                        the mode of the scale.
+```
 
 
+# Installation
+
+```bash
+# Use git to clone this repo then cd into the clone dir.
+git clone https://github.com/cyberrumor/keygen
+cd keygen
+
+# Install pip if you don't already have it. This is python's package manager.
+python -m ensurepip --user --break-system-packages --upgrade
+python -m pip install --user --break-system-packages --upgrade pip
+
+# Install build and run requirements.
+pip3 install --user -r --break-system-packages requirements.txt
+
+# Install keygen
+pip3 install --user --break-system-packages .
+
+# Add your python's user-local bin directory to your PATH, then restart your terminal.
+# The method by which you achieve this depends on your operating system.
+```
 
 [Listen on YouTube](https://www.youtube.com/watch?v=z--FqXawZ2E)
